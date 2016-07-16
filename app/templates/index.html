@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+  <form action="" method="post" name="login">
+      {{ form.hidden_tag() }}
+      {{ form.amount.label }} {{ form.amount(size=40, class_="pidr") }}
+      {% for error in form.errors.amount %}
+          [{{error}}]
+      {% endfor %}
+      {{ form.currency }}<br/>
+      {{ form.description.label }} {{ form.description(size=40) }}
+      {% for error in form.errors.description %}
+          [{{error}}]
+      {% endfor %}
+      <input type="submit" value="Send" class="btn btn-primary">
+  </form>
+{% endblock %}

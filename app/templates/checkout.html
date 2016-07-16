@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+{% from 'render_field.html' import render_field %}
+  <form action="{{ url }}" method="post" name="login" class="form-horizontal">
+    {% for field in form %}
+      {{ render_field(field) }}        
+    {% endfor %}
+    <!-- <input name="sign" value="{{ sign }}"> -->
+    <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+        <input type="submit" value="Send" class="btn btn-primary">
+      </div>
+    </div>
+  </form>
+{% endblock %}
