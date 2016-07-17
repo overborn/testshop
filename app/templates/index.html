@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-  <form action="" method="post" name="login">
+{% from 'render_field.html' import render_field %}
+  <form action="" method="post" name="login" class="form-horizontal">
       {{ form.hidden_tag() }}
-      {{ form.amount.label }} {{ form.amount(size=40, class_="pidr") }}
-      {% for error in form.errors.amount %}
-          [{{error}}]
+      {% for field in form %}
+        {{ render_field(field) }}        
       {% endfor %}
-      {{ form.currency }}<br/>
-      {{ form.description.label }} {{ form.description(size=40) }}
-      {% for error in form.errors.description %}
-          [{{error}}]
-      {% endfor %}
-      <input type="submit" value="Send" class="btn btn-primary">
+      <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-8">
+          <input type="submit" value="Send" class="btn btn-primary">
+          <a href="{{ url_for('index') }}" class="btn btn-default">Cancel</a>
+        </div>
+      </div>
   </form>
 {% endblock %}

@@ -1,15 +1,16 @@
+# -*- coding: utf-8 -*-
 from flask_wtf import Form
-from wtforms import DecimalField, TextField, SelectField, FloatField, IntegerField
+from wtforms import TextField, SelectField, FloatField, IntegerField
 from wtforms.validators import Required, NumberRange, URL
 
 
 class InvoiceForm(Form):
-    currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
     amount = FloatField("Amount", validators=[Required(), NumberRange(min=0)])
+    currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
     description = TextField('Description', validators=[Required()])
 
 
-class CheckoutForm(Form):
+class WlForm(Form):
     WMI_MERCHANT_ID = IntegerField(validators=[Required()])
     WMI_PAYMENT_AMOUNT = FloatField(validators=[Required(), NumberRange(min=0)])
     WMI_CURRENCY_ID = IntegerField(validators=[Required()])
@@ -19,11 +20,26 @@ class CheckoutForm(Form):
     WMI_FAIL_URL = TextField(validators=[Required(), URL()])
     WMI_SUCCESS_URL = TextField(validators=[Required(), URL()])
 
+
+class TIPForm(Form):
+    amount = FloatField("Amount", validators=[Required(), NumberRange(min=0)])
+    currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
+    shopId = TextField(validators=[Required()])
+    sign = TextField(validators=[Required()])
+    shop_invoice_id = TextField(validators=[Required()])
+    description = TextField('Description', validators=[Required()])
+
 """
-<input name="WMI_MERCHANT_ID" value="194260758738"/>
-<input name="WMI_PAYMENT_AMOUNT" value="10.00"/>
-<input name="WMI_CURRENCY_ID" value="980"/>
-<input name="WMI_PAYMENT_NO" value="39"/>
-<input name="WMI_PTENABLED" value="WalletOneUAH"/>
-<input name="WMI_SIGNATURE" value=" ThBrO9NKIjxtIzvuqYcCyA=="/>
+Добрый день, Виталий.
+Вы были правы, в документации указано верно.
+я поначалу смотрел список параметров для запроса pre_invoice, который, насколько я понял, мне использовать при выполнении тестового задания не нужно.
+
+появились еще вопросы.
+написано, что сервис должен состоять из одной страницы.
+в то же время мне предлагается генерировать форму, и подтверждать ее.
+потому хотел уточнить
+сейчас моя реализация предусматривает, что при получении успшного ответа от https://central.pay-trio.com/invoice 
+приложение перенаправляет на страницу с формой, содержащей данные из ответа, которую должен подтвердить пользователь.
+это нормально?
+стоит ли это переписывать, чтоб форма подтягивалась например аяксом на ту же страницу?
 """

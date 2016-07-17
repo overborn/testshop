@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 import hashlib, requests, json
 
 from flask import render_template, redirect, request, url_for
 
 from app import app
-from config import SHOP_ID, SHOP_KEY, UAH_INVOICE_URL
-from forms import InvoiceForm, CheckoutForm
+from config import SHOP_ID, SHOP_KEY, UAH_INVOICE_URL, TIP_URL
+from forms import InvoiceForm, WlForm, TIPForm
 
 INVOICE_KEYS = ("shop_id", "amount", "currency", "payway", "shop_invoice_id")
+TIP_KEYS = ('amount', 'currency', 'shop_id', 'shop_invoice_id')
 
 
 def get_sign(req, keys_required, secret=SHOP_KEY):
@@ -30,10 +32,11 @@ def index():
                 "currency": form.data['currency'],
                 "payway": 'w1_uah',
                 'shop_invoice_id': "blah011",
-                # "description": form.data['description']
+                "description": form.data['description']
             }
             sign = get_sign(payload, INVOICE_KEYS)
             payload['sign'] = sign
+
             resp = requests.post(UAH_INVOICE_URL, json=payload)
             print resp.content
             data = json.loads(resp.content)['data']
@@ -49,9 +52,9 @@ def index():
     return render_template("index.html", form=form)
 
 
-@app.route("/checkout", methods=('POST', 'GET'))
+@app.route("/checkout", methods=('GET',))
 def checkout():
     data = json.loads(request.args['data'])
     url = request.args['url']
-    form = CheckoutForm.from_json(data)
+    form = WlForm.from_json(data)
     return render_template("checkout.html", form=form, url=url)
