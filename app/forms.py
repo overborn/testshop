@@ -22,12 +22,12 @@ class WlForm(Form):
 
 
 class TIPForm(Form):
-    amount = FloatField("Amount", validators=[Required(), NumberRange(min=0)])
+    amount = FloatField(validators=[Required(), NumberRange(min=0)])
     currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
-    shopId = TextField(validators=[Required()])
+    shop_id = TextField(validators=[Required()])
     sign = TextField(validators=[Required()])
     shop_invoice_id = TextField(validators=[Required()])
-    description = TextField('Description', validators=[Required()])
+    description = TextField(validators=[Required()])
 
 """
 Добрый день, Виталий.
