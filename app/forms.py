@@ -1,45 +1,50 @@
 # -*- coding: utf-8 -*-
 from flask_wtf import Form
-from wtforms import TextField, SelectField, FloatField, IntegerField
-from wtforms.validators import Required, NumberRange, URL
+from wtforms import (
+    TextField, SelectField, FloatField, IntegerField, DecimalField, HiddenField
+)
+from wtforms.validators import Required, NumberRange
+
+
+class DisabledWidget(object):
+    def __init__(self, widget):
+        self.widget = widget
+
+    def __getattr__(self, name):
+        return getattr(self.widget, name)
+
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('disabled', True)
+        return self.widget(field, **kwargs)
 
 
 class InvoiceForm(Form):
-    amount = FloatField("Amount", validators=[Required(), NumberRange(min=0)])
+    amount = DecimalField("Amount", validators=[
+        NumberRange(min=0)])
     currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
     description = TextField('Description', validators=[Required()])
 
 
 class WlForm(Form):
-    WMI_MERCHANT_ID = IntegerField(validators=[Required()])
-    WMI_PAYMENT_AMOUNT = FloatField(validators=[Required(), NumberRange(min=0)])
-    WMI_CURRENCY_ID = IntegerField(validators=[Required()])
-    WMI_PAYMENT_NO = IntegerField(validators=[Required()])
-    WMI_PTENABLED = TextField(validators=[Required()])
-    WMI_SIGNATURE = TextField(validators=[Required()])
-    WMI_FAIL_URL = TextField(validators=[Required(), URL()])
-    WMI_SUCCESS_URL = TextField(validators=[Required(), URL()])
+    WMI_MERCHANT_ID = IntegerField()
+    WMI_PAYMENT_AMOUNT = FloatField()
+    WMI_CURRENCY_ID = IntegerField()
+    WMI_PAYMENT_NO = IntegerField()
+    WMI_PTENABLED = TextField()
+    WMI_SIGNATURE = TextField()
+    WMI_FAIL_URL = TextField()
+    WMI_SUCCESS_URL = TextField()
 
 
 class TIPForm(Form):
-    amount = FloatField(validators=[Required(), NumberRange(min=0)])
+    amount = FloatField()
     currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
-    shop_id = TextField(validators=[Required()])
-    sign = TextField(validators=[Required()])
-    shop_invoice_id = TextField(validators=[Required()])
-    description = TextField(validators=[Required()])
+    description = TextField()
+    shop_id = HiddenField()
+    sign = HiddenField()
+    shop_invoice_id = HiddenField()
 
-"""
-Добрый день, Виталий.
-Вы были правы, в документации указано верно.
-я поначалу смотрел список параметров для запроса pre_invoice, который, насколько я понял, мне использовать при выполнении тестового задания не нужно.
-
-появились еще вопросы.
-написано, что сервис должен состоять из одной страницы.
-в то же время мне предлагается генерировать форму, и подтверждать ее.
-потому хотел уточнить
-сейчас моя реализация предусматривает, что при получении успшного ответа от https://central.pay-trio.com/invoice 
-приложение перенаправляет на страницу с формой, содержащей данные из ответа, которую должен подтвердить пользователь.
-это нормально?
-стоит ли это переписывать, чтоб форма подтягивалась например аяксом на ту же страницу?
-"""
+    def __init__(self, *args, **kwargs):
+        super(TIPForm, self).__init__(*args, **kwargs)
+        for field in self:
+            field.widget = DisabledWidget(field.widget)

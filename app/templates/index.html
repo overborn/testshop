@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 {% from 'render_field.html' import render_field %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-info">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
   <form action="" method="post" name="login" class="form-horizontal">
       {{ form.hidden_tag() }}
       {% for field in form %}
