@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from flask_wtf import Form
 from wtforms import (
-    TextField, SelectField, FloatField, IntegerField, DecimalField, HiddenField
+    TextField, SelectField, FloatField, DecimalField, HiddenField, IntegerField
 )
 from wtforms.validators import Required, NumberRange
+from wtforms_components import read_only
 
 
 class DisabledWidget(object):
@@ -25,26 +26,32 @@ class InvoiceForm(Form):
     description = TextField('Description', validators=[Required()])
 
 
-class WlForm(Form):
-    WMI_MERCHANT_ID = IntegerField()
-    WMI_PAYMENT_AMOUNT = FloatField()
-    WMI_CURRENCY_ID = IntegerField()
-    WMI_PAYMENT_NO = IntegerField()
-    WMI_PTENABLED = TextField()
-    WMI_SIGNATURE = TextField()
-    WMI_FAIL_URL = TextField()
-    WMI_SUCCESS_URL = TextField()
+class ReadonlyForm(Form):
+    def __init__(self, *args, **kwargs):
+        super(ReadonlyForm, self).__init__(*args, **kwargs)
+        for field in self:
+            read_only(field)
+        self.currency_name.widget = DisabledWidget(self.currency_name.widget)
 
 
-class TIPForm(Form):
+class WlForm(ReadonlyForm):
+    WMI_MERCHANT_ID = HiddenField()
+    WMI_PAYMENT_AMOUNT = FloatField('Amount')
+    WMI_CURRENCY_ID = HiddenField()
+    currency_name = SelectField('Currency', choices=[
+        ('980', 'uah'), ('643', 'rub')], default='980')
+    WMI_PAYMENT_NO = HiddenField()
+    WMI_PTENABLED = HiddenField()
+    WMI_SIGNATURE = HiddenField()
+    WMI_FAIL_URL = HiddenField()
+    WMI_SUCCESS_URL = HiddenField()
+
+
+class TIPForm(ReadonlyForm):
     amount = FloatField()
-    currency = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
+    currency_name = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
+    currency = HiddenField()
     description = TextField()
     shop_id = HiddenField()
     sign = HiddenField()
     shop_invoice_id = HiddenField()
-
-    def __init__(self, *args, **kwargs):
-        super(TIPForm, self).__init__(*args, **kwargs)
-        for field in self:
-            field.widget = DisabledWidget(field.widget)
