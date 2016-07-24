@@ -8,6 +8,8 @@ Flask-SQLAlchemy==2.1
 Flask-WTF==0.12
 gunicorn==19.6.0
 idna==2.1
+infinity==1.4
+intervals==0.8.0
 ipaddress==1.0.16
 itsdangerous==0.24
 Jinja2==2.8
@@ -23,6 +25,8 @@ SQLAlchemy==1.0.13
 sqlalchemy-migrate==0.10.0
 sqlparse==0.1.19
 Tempita==0.5.2
+validators==0.10.3
 Werkzeug==0.11.10
 WTForms==2.1
+WTForms-Components==0.10.0
 WTForms-JSON==0.2.10
