@@ -49,7 +49,8 @@ class WlForm(ReadonlyForm):
 
 class TIPForm(ReadonlyForm):
     amount = FloatField()
-    currency_name = SelectField(choices=[('980', 'uah'), ('643', 'rub')])
+    currency_name = SelectField(
+        choices=[('980', 'uah'), ('643', 'rub')], default='643')
     currency = HiddenField()
     description = TextField()
     shop_id = HiddenField()

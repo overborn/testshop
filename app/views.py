@@ -7,6 +7,7 @@ from app import app
 from config import SHOP_ID, SHOP_KEY, UAH_INVOICE_URL, TIP_URL
 from forms import InvoiceForm, WlForm, TIPForm
 
+
 INVOICE_KEYS = ("shop_id", "amount", "currency", "payway", "shop_invoice_id")
 TIP_KEYS = ('amount', 'currency', 'shop_id', 'shop_invoice_id')
 
@@ -15,6 +16,7 @@ def _get_sign(req, keys_required, secret=SHOP_KEY):
     keys_sorted = sorted(keys_required)
     string_to_sign = ":".join(
         [str(req[k]).encode("utf8") for k in keys_sorted]) + secret
+    app.logger.info("string_to_sign: {}".format(string_to_sign))
     sign = hashlib.md5(string_to_sign).hexdigest()
     return sign
 
@@ -38,6 +40,7 @@ def index():
             resp = requests.post(UAH_INVOICE_URL, json=payload)
             print resp.content
             data = json.loads(resp.content)['data']
+            app.logger.info("data: {}".format(data))
             if not data:
                 flash(json.loads(resp.content)['message'])
                 return render_template("index.html", form=form)
