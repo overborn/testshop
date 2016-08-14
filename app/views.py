@@ -3,7 +3,8 @@ import hashlib, requests, json
 
 from flask import render_template, redirect, request, url_for, flash
 
-from app import app
+from app import app, db
+from models import Invoice
 from config import SHOP_ID, SHOP_KEY, UAH_INVOICE_URL, TIP_URL
 from forms import InvoiceForm, WlForm, TIPForm
 
@@ -25,12 +26,21 @@ def _get_sign(req, keys_required, secret=SHOP_KEY):
 def index():
     form = InvoiceForm()
     if form.validate_on_submit():
+        invoice = Invoice(
+            str(form.data['amount']),
+            form.data['currency'],
+            form.data['description']
+        )
+        db.session.add(invoice)
+        db.session.commit()
+        app.logger.info("invoice created: {}".format(invoice))
+
         payload = {
             "shop_id": SHOP_ID,
-            "amount": str(form.data['amount']),
-            "currency": form.data['currency'],
+            "amount": invoice.amount,
+            "currency": invoice.currency,
             'shop_invoice_id': "blah011",
-            "description": form.data['description']
+            "description": invoice.description
         }
 
         if form.data['currency'] == '980':
@@ -38,7 +48,7 @@ def index():
             sign = _get_sign(payload, INVOICE_KEYS)
             payload['sign'] = sign
             resp = requests.post(UAH_INVOICE_URL, json=payload)
-            print resp.content
+            # print resp.content
             data = json.loads(resp.content)['data']
             app.logger.info("data: {}".format(data))
             if not data:
@@ -65,7 +75,8 @@ def index():
 def checkout():
     url = request.args['url']
     data = json.loads(request.args["data"])
-    print data
+    # print data
+    app.logger.info("data got: {}".format(data))
     if url == TIP_URL:
         form = TIPForm.from_json(data)
     else:
