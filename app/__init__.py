@@ -1,5 +1,4 @@
 import logging, os
-from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -13,14 +12,7 @@ db = SQLAlchemy(app)
 wtforms_json.init()
 
 # Logging settings
-if os.environ.get('HEROKU') is None:
-    handler = RotatingFileHandler(
-        'testshop.log', maxBytes=1 * 1024 * 1024, backupCount=1
-    )
-    handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
-else:
-    handler = logging.StreamHandler()
+handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)

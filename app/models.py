@@ -25,5 +25,6 @@ class Invoice(db.Model):
         #     print self
 
     def __repr__(self):
-        return '<Invoice {}: {} {} [{}]>'.format(
-            self.id, self.amount, self.currency, self.created)
+        return '<Invoice {}: {} {} {} [{}]>'.format(
+            self.id, self.amount, self.currency, self.description, self.created
+        )

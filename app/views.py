@@ -25,6 +25,7 @@ def _get_sign(req, keys_required, secret=SHOP_KEY):
 @app.route("/", methods=('POST', 'GET'))
 def index():
     form = InvoiceForm()
+
     if form.validate_on_submit():
         invoice = Invoice(
             str(form.data['amount']),
@@ -82,3 +83,29 @@ def checkout():
     else:
         form = WlForm.from_json(data)
     return render_template("checkout.html", form=form, url=url)
+
+
+@app.route("/notify", methods=('POST',))
+def notify():
+    app.logger.info(request.values)
+    keys = [key for key in request.values if (
+        request.values[key] != 'null' and key != 'sign')]
+    print "keys: {}".format(keys)
+    sign = _get_sign(request.values, keys)
+    print sign, request.values.get('sign', '')
+    if sign != request.values.get('sign', ''):
+        return 'WRONG SIGN'
+    shop_invoice_id = request.values.get('shop_invoice_id', '')
+    invoice = Invoice.query.get(shop_invoice_id)
+    app.logger.info("invoice: {}".format(invoice))
+    if invoice:
+        print invoice.amount == request.values.get('shop_amount')
+        print type(invoice.amount), type(request.values.get('shop_amount'))
+    if (
+        invoice and
+        invoice.amount == float(request.values.get('shop_amount')) and
+        invoice.currency == request.values.get('shop_currency') and
+        invoice.description == request.values.get('description')
+    ):
+        return 'OK'
+    return "ERROR"

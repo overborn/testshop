@@ -22,7 +22,7 @@ pycparser==2.14
 pyOpenSSL==16.0.0
 requests==2.10.0
 six==1.10.0
-SQLAlchemy==1.1.0b3
+SQLAlchemy==1.0.0
 sqlalchemy-migrate==0.10.0
 sqlparse==0.1.19
 Tempita==0.5.2
