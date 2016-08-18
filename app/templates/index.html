@@ -28,7 +28,7 @@
     $(document).ready(function() {
       var $form = $('#invoiceForm');
 
-      function makeInputHTML(data){
+      function makeInputsHTML(data){
         var rez = '';
         $.each(data, function(name, value){
           rez += '<input type="text" name="' + name + 
@@ -38,7 +38,6 @@
       };
 
       $form.ajaxForm({
-        // dataType: 'json',
         beforeSubmit: function(){
           $form.validate({
             rules: {
@@ -54,7 +53,6 @@
             return false
         },
         success: function(response, statusText, xhr){
-          console.log(response, statusText, xhr);
           if (response.result == 'error'){
             $form.before('<div class="alert alert-info">' + 
               '<button type="button" class="close" data-dismiss="alert">' + 
@@ -62,11 +60,10 @@
           } else if (response.result == 'ok'){
             $('#hiddenform-container').html(
               '<form id="hiddenForm" action="'+ response.url + '" method="post">' +
-              makeInputHTML(response.data) + '</form>'
+              makeInputsHTML(response.data) + '</form>'
             );
             $('#hiddenForm').submit();
           }
-          // console.log(JSON.parse(response))
         },
       }); 
     });

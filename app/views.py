@@ -43,9 +43,13 @@ def check():
         db.session.commit()
         app.logger.info(u"invoice created: {}".format(invoice))
 
+        # hack for passing signature check
+        amount = int(invoice.amount) if (
+            int(invoice.amount) == float(invoice.amount)) else invoice.amount
+
         payload = {
             "shop_id": SHOP_ID,
-            "amount": invoice.amount,
+            "amount": amount,
             "currency": invoice.currency,
             'shop_invoice_id': invoice.id,
             "description": invoice.description
