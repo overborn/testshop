@@ -68,6 +68,11 @@ def check():
             data = payload
             url = TIP_URL
 
+        else:
+            return jsonify({'result': 'error', 'message': 'Wrong currency'})
+
+        app.logger.info("data sent: {}".format(data))
+
         return jsonify({'result': 'ok', 'data': data, 'url': url})
     return jsonify({'result': 'error', 'message': 'Form validation error'})
 
