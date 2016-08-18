@@ -11,7 +11,7 @@
     {% endfor %}
   {% endif %}
 {% endwith %}
-  <form action="" method="post" name="login" class="form-horizontal">
+  <form action="{{ url_for('check') }}" method="post" name="login" class="form-horizontal" id="invoiceForm">
       {{ form.hidden_tag() }}
       {% for field in form %}
         {{ render_field(field) }}        
@@ -23,4 +23,52 @@
         </div>
       </div>
   </form>
+  <div style="display:none" id="hiddenform-container"></div>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var $form = $('#invoiceForm');
+
+      function makeInputHTML(data){
+        var rez = '';
+        $.each(data, function(name, value){
+          rez += '<input type="text" name="' + name + 
+          '" value="' + value + '">'
+        });
+        return rez;
+      };
+
+      $form.ajaxForm({
+        // dataType: 'json',
+        beforeSubmit: function(){
+          $form.validate({
+            rules: {
+              amount: {
+                required: true,
+                number: true,
+                min: 0
+              },
+              description: "required",
+            }
+          });
+          if (!($form.valid()))
+            return false
+        },
+        success: function(response, statusText, xhr){
+          console.log(response, statusText, xhr);
+          if (response.result == 'error'){
+            $form.before('<div class="alert alert-info">' + 
+              '<button type="button" class="close" data-dismiss="alert">' + 
+              '&times;</button>' + response.message + '</div>');
+          } else if (response.result == 'ok'){
+            $('#hiddenform-container').html(
+              '<form id="hiddenForm" action="'+ response.url + '" method="post">' +
+              makeInputHTML(response.data) + '</form>'
+            );
+            $('#hiddenForm').submit();
+          }
+          // console.log(JSON.parse(response))
+        },
+      }); 
+    });
+  </script>
 {% endblock %}

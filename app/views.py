@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import hashlib, requests, json
 
-from flask import render_template, redirect, request, url_for, flash
+from flask import (
+    render_template, request, jsonify
+)
 
 from app import app, db
 from models import Invoice
 from config import SHOP_ID, SHOP_KEY, UAH_INVOICE_URL, TIP_URL
-from forms import InvoiceForm, WlForm, TIPForm
+from forms import InvoiceForm
 
 
 INVOICE_KEYS = ("shop_id", "amount", "currency", "payway", "shop_invoice_id")
@@ -22,85 +24,65 @@ def _get_sign(req, keys_required, secret=SHOP_KEY):
     return sign
 
 
-@app.route("/", methods=('POST', 'GET'))
+@app.route("/", methods=('GET',))
 def index():
     form = InvoiceForm()
+    return render_template("index.html", form=form)
 
+
+@app.route("/check", methods=('POST', ))
+def check():
+    form = InvoiceForm()
     if form.validate_on_submit():
         invoice = Invoice(
-            str(form.data['amount']),
+            form.data['amount'],
             form.data['currency'],
             form.data['description']
         )
         db.session.add(invoice)
         db.session.commit()
-        app.logger.info("invoice created: {}".format(invoice))
+        app.logger.info(u"invoice created: {}".format(invoice))
 
         payload = {
             "shop_id": SHOP_ID,
             "amount": invoice.amount,
             "currency": invoice.currency,
-            'shop_invoice_id': "blah011",
+            'shop_invoice_id': invoice.id,
             "description": invoice.description
         }
-
-        if form.data['currency'] == '980':
+        if invoice.currency == '980':
             payload["payway"] = 'w1_uah'
             sign = _get_sign(payload, INVOICE_KEYS)
             payload['sign'] = sign
             resp = requests.post(UAH_INVOICE_URL, json=payload)
-            # print resp.content
             data = json.loads(resp.content)['data']
             app.logger.info("data: {}".format(data))
             if not data:
-                flash(json.loads(resp.content)['message'])
-                return render_template("index.html", form=form)
+                return jsonify(json.loads(resp.content))
             url = data['source']
-            data = json.dumps(data['data'])
+            data = data['data']
 
-        elif form.data['currency'] == '643':
+        elif invoice.currency == '643':
             sign = _get_sign(payload, TIP_KEYS)
             payload['sign'] = sign
+            data = payload
             url = TIP_URL
-            data = json.dumps(payload)
 
-        return redirect(url_for(
-            'checkout',
-            data=data,
-            url=url)
-        )
-    return render_template("index.html", form=form)
-
-
-@app.route("/checkout", methods=('GET',))
-def checkout():
-    url = request.args['url']
-    data = json.loads(request.args["data"])
-    # print data
-    app.logger.info("data got: {}".format(data))
-    if url == TIP_URL:
-        form = TIPForm.from_json(data)
-    else:
-        form = WlForm.from_json(data)
-    return render_template("checkout.html", form=form, url=url)
+        return jsonify({'result': 'ok', 'data': data, 'url': url})
+    return jsonify({'result': 'error', 'message': 'Form validation error'})
 
 
 @app.route("/notify", methods=('POST',))
 def notify():
     app.logger.info(request.values)
     keys = [key for key in request.values if (
-        request.values[key] != 'null' and key != 'sign')]
-    print "keys: {}".format(keys)
+        request.values[key] not in ['null', None] and key != 'sign')]
     sign = _get_sign(request.values, keys)
-    print sign, request.values.get('sign', '')
     if sign != request.values.get('sign', ''):
         return 'WRONG SIGN'
     shop_invoice_id = request.values.get('shop_invoice_id', '')
     invoice = Invoice.query.get(shop_invoice_id)
     app.logger.info("invoice: {}".format(invoice))
-    if invoice:
-        print invoice.amount == request.values.get('shop_amount')
-        print type(invoice.amount), type(request.values.get('shop_amount'))
     if (
         invoice and
         invoice.amount == float(request.values.get('shop_amount')) and

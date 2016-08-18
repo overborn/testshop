@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
-from sqlalchemy.ext.hybrid import hybrid_property
 from app import db
 
 
@@ -15,16 +15,7 @@ class Invoice(db.Model):
         self.currency = currency
         self.description = description
 
-    @hybrid_property
-    # @property
-    def invoice_id(self):
-        # try:
-        if self.created:
-            return "{}:{}".format(self.id, self.created.strftime("%s"))
-        # except AttributeError:
-        #     print self
-
     def __repr__(self):
-        return '<Invoice {}: {} {} {} [{}]>'.format(
+        return u'<Invoice {}: {} {} {} [{}]>'.format(
             self.id, self.amount, self.currency, self.description, self.created
         )
