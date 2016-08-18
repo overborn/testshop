@@ -1,16 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% from 'render_field.html' import render_field %}
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-info">
-          <button type="button" class="close" data-dismiss="alert">&times;</button>
-          {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+  <div id="alerts"></div>
   <form action="{{ url_for('check') }}" method="post" name="login" class="form-horizontal" id="invoiceForm">
       {{ form.hidden_tag() }}
       {% for field in form %}
@@ -54,7 +45,7 @@
         },
         success: function(response, statusText, xhr){
           if (response.result == 'error'){
-            $form.before('<div class="alert alert-info">' + 
+            $('#alerts').html('<div class="alert alert-info">' + 
               '<button type="button" class="close" data-dismiss="alert">' + 
               '&times;</button>' + response.message + '</div>');
           } else if (response.result == 'ok'){
